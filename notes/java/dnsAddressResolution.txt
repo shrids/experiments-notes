@@ -1,0 +1,17 @@
+1. DNS CLient resolver cache:
+    DNS client resolver cache is RAM based table consisting of entries in the hosts file and hostname that the OS has previously resolved using DNS. Response to the DNS queries are cached through a configurable parameter TTL.
+2. Java system property to set this is 
+    networkaddress.cache.ttl
+3. Starting Java 6 the default value for “networkaddress.cache.ttl” is changed to 30
+4. 
+getAddress                                        Returns the raw IP Address for this object.
+getAllByName(String host)                  Given the name of host, an array of IP address is returned.
+getByAddress(byte[] addr)                   Returns an InetAddress object given the raw IP address
+getByAddress(String host, byte[] addr) Create an InetAddress based on the provided host name and IP address
+getByName(String host)                       Determines the IP address of a host, given the host's name.
+getCanonicalHostName()                      Gets the fully qualified domain name for this IP address.
+getHostAddress()                                 Returns the IP address string in textual presentation
+getHostName()                                    Gets the host name for this IP address
+getLocalHost()                                     Returns the local host.
+
+5. Resolve issue seems to be handled in many projects...
