@@ -15,3 +15,15 @@ getHostName()                                    Gets the host name for this IP 
 getLocalHost()                                     Returns the local host.
 
 5. Resolve issue seems to be handled in many projects...
+
+6. java 1.6 introduced a change to the default DNS caching behaviour networkaddress.cache.ttl changed from -1(cache forever) to system dependent value.
+
+7. 
+Regarding Pull request : https://github.com/apache/zookeeper/pull/150/files
+ - If Ip address is supplied to client then do not re-resolve.... if Hostname is given only then re-resolve. Is this better?
+ - LOG statement invokes getHostString(currAddr) again.
+
+8. Lesson learnt : 
+- create InetSocketAddress instance only at the last instance, this ensures the lookup happens at that instance.
+Projects like elastic search, mongodb have similar changes done.
+- sun.net.spi.nameservice.dns.DNSNameService we use this to lookup address for a given hostname.
