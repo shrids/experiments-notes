@@ -1,0 +1,44 @@
+Curator findings
+==================
+==> Version we are using is 2.11
+==> Curator has the following states org.apache.curator.framework.state.ConnectionState {
+CONNECTED - Sent for the first successful connection to the server. 
+SUSPENDED - There has been a loss of connection. Leaders, locks, etc. should suspend until the connection is re-established. if connection times out a LOST
+RECONNECTED - A suspended, lost, or read-only connection has been re-established
+LOST - The connection is confirmed to be lost.Close any locks, leaders, etc. and attempt to re-create them.
+READONLY - Readonly connection to ZK.
+}
+==> ZK Client events:
+org.apache.zookeeper.Watcher.Event.KeeperState.Disconnected - the client is in disconnected state. i.e. the client is not connected any server in zk ensemble
+org.apache.zookeeper.Watcher.Event.KeeperState.Expired - The serving cluster has expired this session. The ZooKeeper client connection (the session) is no longer valid. You must create a new client connection
+==>
+ZK Client Event Disconnected  changes Curator state to to SUSPENDED.
+ZK Client Event Exprired or KeeperException.Code.SESSIONEXPIRED changes Curator state to LOST.
+ZK Client Event SyncConnected changes Curator state to RECONNECTED.
+==>
+This implies the following since we are using Curator 2.x (Reference: [1])
+- Connection timeout indicates how long curator will wait for "SysConnected" from zk client before retrying. (Reference[2])
+- When curator sees "Disconnected" message/event from zk client curator changes state to SUSPENDED. On recieving "Disconnected" curator invokes the Retry logic. When the Retry logic (Passed via constructor ) gives up it changes the state to "LOST" or when it recieves "Expired" event from zk.
+- Curator will set the LOST state when it believes that the ZooKeeper session has expired.
+==>
+Current default timeout timeouts :
+Session timeout : 30 seconds. (This corresponds to ZK Session timeout)
+Connection timeout = 10 seconds
+Exponential Backoff with (Initial Sleep Interval 5seconds : and max retries: 5)
+==>
+Exponential BackOff computation:
+long sleepMs = baseSleepTimeMs * Math.max(1, random.nextInt(1 << (retryCount + 1)));
+5* 1 + 5*2 + 5* 4 + 5 * 8 + 5* 16 = 5 + 10 + 20 + 40 + 80 = 155 seconds.
+=> Current retry count is too high, we should reduce it. Is 3 appropriate.
+[1]https://stackoverflow.com/questions/27912231/timeout-configurations-in-curator
+[2]org.apache.curator.ConnectionState#checkTimeouts
+[3]io.pravega.controller.store.client.StoreClientFactory.ZKClientFactory
+
+====
+Curator waits for duration `connectionTimeout` for getting `SyncConnected` event. If no `SyncConnected` event is observed during this time it throws `CuratorConnectionLossException` internally triggerring a Retry. During this Retry by default it does create a new instance of `org.apache.zookeeper.ZooKeeper` (default factory: `org.apache.curator.utils.DefaultZookeeperFactory`)
+
+Now, in the controller a custom zookeeper factory is used (`io.pravega.controller.store.client.StoreClientFactory.ZKClientFactory`) this does not create a seperate instance of `org.apache.zookeeper.ZooKeeper`
+
+Also, curator has a state called `org.apache.curator.framework.state.ConnectionState.CONNECTED` . This is changed on the first successful connection to the zk server (from javadoc). Once it is in connected state it can either be in SUSPENDED , RECONNECTED, LOST or READONLY.
+
+i.e. Connection timeout ~should~ indicates how long curator will wait for the *first* `SyncConnected` event.
