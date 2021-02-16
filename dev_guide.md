@@ -52,6 +52,50 @@ git clone https://github.com/pravega/pravega-samples.git
 The solution is located in the pravega-client-examples [directory]( https://github.com/pravega/pravega-samples/tree/master/pravega-client-examples/src/main/java/io/pravega/example/gettingstarted ).
 
 # 4. Starting Pravega Standalone.
+In standalone mode, the Pravega server is accessible from clients through the `localhost` interface only. Controller REST APIs, however, are accessible from remote hosts/machines.
+You can launch a standalone mode server using either of the following options:
+
+1. From source code
+
+<details>
+<summary>Commands to start standalone from source code</summary>
+<p>
+
+Checkout the source code:
+```java
+$ git clone https://github.com/pravega/pravega.git
+$ cd pravega
+```
+Build the Pravega standalone mode distribution:
+
+```java
+./gradlew startStandalone
+```
+
+</p>
+</details>
+
+2. From installation package
+
+<details>
+<summary>Commands to start standalone from installation package</summary>
+<p>
+Download the Pravega release from the [GitHub Releases](https://github.com/pravega/pravega/releases).
+
+```java
+$ tar xfvz pravega-<version>.tgz
+```
+Download and extract either tarball or zip files. Follow the instructions provided for the tar files (same can be applied for zip file) to launch all the components of Pravega on your local machine.
+
+Run Pravega Standalone:
+
+```java
+$ pravega-<version>/bin/pravega-standalone
+```
+
+</p>
+</details>  
+
 
 # 5. Bootstrapping the Project.
 
