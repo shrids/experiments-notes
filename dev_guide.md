@@ -48,3 +48,10 @@ git clone https://github.com/pravega/pravega-samples.git
 </p>
 </details>  
 
+
+The solution is located in the pravega-client-examples [directory]( https://github.com/pravega/pravega-samples/tree/master/pravega-client-examples/src/main/java/io/pravega/example/gettingstarted ).
+
+# 4. Starting Pravega Standalone.
+
+# 5. Bootstrapping the Project.
+
