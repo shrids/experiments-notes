@@ -163,9 +163,10 @@ Let's create a Pravega Event Writer using the [EventStreamClientFactory](https:/
             writer.writeEvent("helloRoutingKey", "hello world!"); // write an event.
   }
  ```
-The above snippet creates an Event Writer and writes an event into the Pravega stream. (note that writeEvent() returns a CompletableFuture, which can be captured for use or will be resolved when calling flush() or close(), and, if destined for the same segment, the futures write in the order writeEvent() is called)
+The above snippet creates an Event Writer and writes an event into the Pravega stream. Note that `writeEvent()` returns a `CompletableFuture`, which can be captured for use or will be resolved when calling `flush()` or `close()`, and, if destined for the same segment, the futures write in the order `writeEvent()` is called.
 <p>
-When instantiating the EventStreamWriter above, we passed in a [UTF8StringSerializer](https://github.com/pravega/pravega/blob/master/client/src/main/java/io/pravega/client/stream/impl/UTF8StringSerializer.java) instance. Pravega uses a [Serializer](https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/stream/Serializer.html) interface in its writers and readers to simplify the act of writing and reading an object’s bytes to and from streams. The [JavaSerializer](https://github.com/pravega/pravega/blob/master/client/src/main/java/io/pravega/client/stream/impl/JavaSerializer.java) can handle any `Serializable` object.
+    
+When instantiating the EventStreamWriter above, we passed in a [UTF8StringSerializer]( https://github.com/pravega/pravega/blob/master/client/src/main/java/io/pravega/client/stream/impl/UTF8StringSerializer.java ) instance. Pravega uses a [Serializer]( https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/stream/Serializer.html) interface in its writers and readers to simplify the act of writing and reading an object’s bytes to and from streams. The [JavaSerializer](https://github.com/pravega/pravega/blob/master/client/src/main/java/io/pravega/client/stream/impl/JavaSerializer.java) can handle any `Serializable` object.
 </p>
 
 # 5.3 Create a Pravega Event Reader and read the event back from the stream.
@@ -199,3 +200,5 @@ We can attach an Pravega Event Reader to this reader group and read the data fro
   }
 ```
 
+# 6. What’s next?
+This guide covered the creation of a application that writes and reads from Pravega. However, there is much more. We recommend continuing the journey by going through [Pravega-client-101](https://blog.pravega.io/2020/09/22/pravega-client-api-101/) and other samples present in the [Pravega Samples repo](https://github.com/pravega/pravega-samples).
