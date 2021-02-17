@@ -25,7 +25,7 @@ To complete this guide, you need:
   <summary>Gradle 6.5.1+</summary>
   Installation : https://gradle.org/install/
   
-  !! Verify Gradle is using the Java you expect. You can verify which JDK Gradle uses by running gradle --version.!!
+  !! Verify Gradle is using the Java you expect. You can verify which JDK Gradle uses by running `gradle --version`.!!
 </details>
 
 # 2. Architecture
@@ -98,4 +98,104 @@ $ pravega-<version>/bin/pravega-standalone
 
 
 # 5. Bootstrapping the Project.
+
+The easiest way to bootstrap a sample application against Pravega is to run the following command in a folder of your choice. 
+```
+ gradle init --type java-application
+```
+Add the below snippet to dependencies section of build.gradle in the app directory
+```
+// https://mvnrepository.com/artifact/io.pravega/pravega-client
+implementation group: 'io.pravega', name: 'pravega-client', version: '0.8.1'
+```
+Invoke `gradle run` to run the project.
+
+ 
+<details>
+<summary>Expected output</summary>
+<p>
+
+```java
+osboxes@osboxes:/tmp/demo$ gradle run
+
+> Task :app:run
+Hello World!
+
+BUILD SUCCESSFUL in 890ms
+2 actionable tasks: 2 executed
+
+```
+
+</p>
+</details>
+
+# 5.1 Create a Pravega Stream
+
+Let’s first get to know Pravega’s client APIs by creating a stream with a fixed scaling policy of 1 segment. We’ll need a StreamConfiguration to define this:
+```java
+StreamConfiguration streamConfig = StreamConfiguration.builder()
+        .scalingPolicy(ScalingPolicy.fixed(1))
+        .build();
+```
+With this streamConfig, we can create streams that feel a bit more like traditional append-only files. Streams exist within scopes, which provide a namespace for related streams. We use a [StreamManager](https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/admin/StreamManager.html) to tell a Pravega cluster controller to create our scope and our streams. Since we are using a standalone Pravega let's use the below controller address.
+```java
+URI controllerURI = URI.create("tcp://localhost:9090");
+```
+The code to create a Pravega stream is as follows
+```java
+try (StreamManager streamManager = StreamManager.create(controllerURI)) {
+        streamManager.createScope("examples");
+        streamManager.createStream("examples", "helloStream", streamConfig);
+}
+```
+Executing the above lines should ensure we have created a Pravega scope called `examples` and a Pravega Stream called `helloStream`.
+
+# 5.2 Create a Pravega Event Writer and write events into the stream.
+
+Let's create a Pravega Event Writer using the [EventStreamClientFactory](https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/EventStreamClientFactory.html)
+
+```java
+  try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope("examples",
+                ClientConfig.builder().controllerURI(controllerURI).build());
+             EventStreamWriter<String> writer = clientFactory.createEventWriter("helloStream",
+                     new UTF8StringSerializer(), EventWriterConfig.builder().build())) {
+
+            writer.writeEvent("helloRoutingKey", "hello world!"); // write an event.
+  }
+ ```
+The above snippet creates an Event Writer and writes an event into the Pravega stream. (note that writeEvent() returns a CompletableFuture, which can be captured for use or will be resolved when calling flush() or close(), and, if destined for the same segment, the futures write in the order writeEvent() is called)
+<p>
+When instantiating the EventStreamWriter above, we passed in a [UTF8StringSerializer](https://github.com/pravega/pravega/blob/master/client/src/main/java/io/pravega/client/stream/impl/UTF8StringSerializer.java) instance. Pravega uses a [Serializer](https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/stream/Serializer.html) interface in its writers and readers to simplify the act of writing and reading an object’s bytes to and from streams. The [JavaSerializer](https://github.com/pravega/pravega/blob/master/client/src/main/java/io/pravega/client/stream/impl/JavaSerializer.java) can handle any `Serializable` object.
+</p>
+
+# 5.3 Create a Pravega Event Reader and read the event back from the stream.
+
+Readers are associated with reader groups, which track the readers’ progress and allow more than one reader to coordinate over which segments they’ll read.
+A [ReaderGroupManager](https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/admin/ReaderGroupManager.html) is used to create a new reader group on the Pravega Stream.
+
+
+The below snippet create a [ReaderGroup](https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/stream/ReaderGroup.html)
+```java
+     try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope("examples", controllerURI)) {
+            ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
+                    .stream(Stream.of("examples", "helloStream"))
+                    .disableAutomaticCheckpoints()
+                    .build();
+            readerGroupManager.createReaderGroup("readerGroup", readerGroupConfig);
+     }
+```
+We can attach an Pravega Event Reader to this reader group and read the data from the Pravega Stream `helloStream`. The below snippet creates an EventReader called `reader` and reads the value from the Pravega Stream.
+
+```java
+  try (EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope("examples",
+                ClientConfig.builder().controllerURI(controllerURI).build());
+             EventStreamReader<String> reader = clientFactory.createReader("reader",
+                     "readerGroup",
+                     new UTF8StringSerializer(),
+                     ReaderConfig.builder().build())) {
+
+            String event = reader.readNextEvent(5000).getEvent();
+            System.out.println(event);
+  }
+```
 
