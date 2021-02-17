@@ -29,12 +29,9 @@ To complete this guide, you need:
 </details>
 
 # 2. Goal
-In this guide, we create a straightforward application that creates a stream on Pravega and writes an event into the Stream and reads back from it.
-
-# 3. Solution
-We recommend that you follow the instructions from #Bootstrapping project and onwards to create the application step by step.
-However, you can go right to the completed example.
-Download an [archive]( https://github.com/pravega/pravega-samples/archive/v0.8.0.zip) or clone the git repository:
+In this guide, we will create a straightforward application that creates a Stream on Pravega and writes an event into the Stream and reads back from it.
+We recommend that you follow the instructions from #Bootstrapping project onwards to create the application step by step.
+However, you can go straight to the completed example at [Pravega-samples-repo](https://github.com/pravega/pravega-samples).
 
 <details>
 <summary>Command to clone the pravega-samples repo</summary>
@@ -51,7 +48,7 @@ git clone https://github.com/pravega/pravega-samples.git
 
 The solution is located in the pravega-client-examples [directory]( https://github.com/pravega/pravega-samples/tree/master/pravega-client-examples/src/main/java/io/pravega/example/gettingstarted ).
 
-# 4. Starting Pravega Standalone.
+# 3. Starting Pravega Standalone.
 In standalone mode, the Pravega server is accessible from clients through the `localhost` interface only. Controller REST APIs, however, are accessible from remote hosts/machines.
 You can launch a standalone mode server using either of the following options:
 
@@ -97,7 +94,7 @@ $ pravega-<version>/bin/pravega-standalone
 </details>  
 
 
-# 5. Bootstrapping the Project.
+# 4. Bootstrapping the Project.
 
 The easiest way to bootstrap a sample application against Pravega is to run the following command in a folder of your choice. 
 ```
@@ -129,7 +126,7 @@ BUILD SUCCESSFUL in 890ms
 </p>
 </details>
 
-# 5.1 Create a Pravega Stream
+# 4.1 Create a Pravega Stream
 
 Let’s first get to know Pravega’s client APIs by creating a stream with a fixed scaling policy of 1 segment. We’ll need a StreamConfiguration to define this:
 ```java
@@ -150,7 +147,7 @@ try (StreamManager streamManager = StreamManager.create(controllerURI)) {
 ```
 Executing the above lines should ensure we have created a Pravega scope called `examples` and a Pravega Stream called `helloStream`.
 
-# 5.2 Create a Pravega Event Writer and write events into the stream.
+# 4.2 Create a Pravega Event Writer and write events into the stream.
 
 Let's create a Pravega Event Writer using the [EventStreamClientFactory](https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/EventStreamClientFactory.html)
 
@@ -169,7 +166,7 @@ The above snippet creates an Event Writer and writes an event into the Pravega s
 When instantiating the EventStreamWriter above, we passed in a [UTF8StringSerializer]( https://github.com/pravega/pravega/blob/master/client/src/main/java/io/pravega/client/stream/impl/UTF8StringSerializer.java ) instance. Pravega uses a [Serializer]( https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/stream/Serializer.html) interface in its writers and readers to simplify the act of writing and reading an object’s bytes to and from streams. The [JavaSerializer](https://github.com/pravega/pravega/blob/master/client/src/main/java/io/pravega/client/stream/impl/JavaSerializer.java) can handle any `Serializable` object.
 </p>
 
-# 5.3 Create a Pravega Event Reader and read the event back from the stream.
+# 4.3 Create a Pravega Event Reader and read the event back from the stream.
 
 Readers are associated with reader groups, which track the readers’ progress and allow more than one reader to coordinate over which segments they’ll read.
 A [ReaderGroupManager](https://pravega.io/docs/latest/javadoc/clients/io/pravega/client/admin/ReaderGroupManager.html) is used to create a new reader group on the Pravega Stream.
@@ -200,5 +197,5 @@ We can attach an Pravega Event Reader to this reader group and read the data fro
   }
 ```
 
-# 6. What’s next?
+# 5. What’s next?
 This guide covered the creation of a application that writes and reads from Pravega. However, there is much more. We recommend continuing the journey by going through [Pravega-client-101](https://blog.pravega.io/2020/09/22/pravega-client-api-101/) and other samples present in the [Pravega Samples repo](https://github.com/pravega/pravega-samples).
