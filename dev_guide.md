@@ -28,11 +28,11 @@ To complete this guide, you need:
   !! Verify Gradle is using the Java you expect. You can verify which JDK Gradle uses by running `gradle --version`.!!
 </details>
 
-# 2. Architecture
+# 2. Goal
 In this guide, we create a straightforward application that creates a stream on Pravega and writes an event into the Stream and reads back from it.
 
 # 3. Solution
-We recommend that you follow the instructions from Bootstrapping project and onwards to create the application step by step.
+We recommend that you follow the instructions from #Bootstrapping project and onwards to create the application step by step.
 However, you can go right to the completed example.
 Download an [archive]( https://github.com/pravega/pravega-samples/archive/v0.8.0.zip) or clone the git repository:
 
